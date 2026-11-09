@@ -1,0 +1,91 @@
+# ============================================================
+#  YtStream 設定ファイル
+#  変更後は /ytstream reload(実行中の配信へは /ytstream restart 後に反映)
+#  配信画面のレイアウト確認は /ytstream preview(plugins/YtStream/preview.png)
+# ============================================================
+
+# 配信画面に表示するサーバー名
+server-name: "My Minecraft Server"
+
+youtube:
+  # ストリームキーの指定方法(優先順位: 環境変数 > secrets.yml > ここ)
+  #   1. 環境変数 YTSTREAM_KEY            ← 推奨
+  #   2. plugins/YtStream/secrets.yml に  stream-key: "xxxx-xxxx-xxxx-xxxx-xxxx"
+  #   3. この項目(平文保存になるため非推奨)
+  # ストリームキーはゲーム内コマンドで入力しないでください(コマンドログに残ります)。
+  stream-key: ""
+  rtmp-url: "rtmp://a.rtmp.youtube.com/live2"   # rtmps://a.rtmps.youtube.com:443/live2 も可
+  # YouTube以外のRTMPサーバーへ送る場合のみ true(誤送信・情報漏えい防止の安全装置)
+  allow-custom-host: false
+
+video:
+  width: 1280            # 1280x720 が既定。1920x1080 も可(CPU負荷は約2倍)
+  height: 720
+  fps: 30                # 静止画面が中心なので 15〜30 で十分。下げるほどCPUに優しい
+  bitrate-kbps: 2500     # 720p30の目安 2500〜4500 / 1080p30の目安 4500〜9000
+  codec: libx264         # libx264 | h264_nvenc | h264_qsv | h264_videotoolbox | h264_amf
+  preset: veryfast       # libx264のみ。CPUが厳しければ superfast / ultrafast
+  tune: zerolatency
+  threads: 2             # エンコードに使うCPUスレッド数(0=自動)。Minecraft本体を守るため既定は2
+  low-priority: true     # Linuxで nice 10 を付けて起動(サーバー本体を優先)
+
+audio:
+  enabled: true          # 無音トラックを付与(YouTubeの音声なし警告を避ける)
+  bitrate-kbps: 128
+
+ffmpeg:
+  # "ffmpeg" = plugins/YtStream/ffmpeg/ → PATH の順で自動検索。絶対パスも指定可
+  path: "ffmpeg"
+
+reconnect:
+  enabled: true
+  max-attempts: 10       # 0 = 無制限
+  initial-delay-seconds: 5
+  max-delay-seconds: 60  # 指数バックオフの上限
+
+background:
+  # plugins/YtStream/ 内の画像(PNG/JPG)。無い場合は内蔵のMinecraft風背景を自動生成
+  path: "background.png"
+
+theme:
+  name: default          # default | nether | end
+  accent: ""             # 例 "#55FF55"(空=テーマ既定)
+  panel-opacity: 62      # 0〜100
+  font: "SansSerif"      # 日本語が文字化けする場合は日本語フォント名か font-file を指定
+  font-file: ""          # plugins/YtStream/ 内のTTF/OTF(例 "fonts/NotoSansJP.ttf")
+
+display:
+  chat: true             # ※チャットは公開配信に映ります。プライバシーに注意
+  join-leave: true
+  player-list: true
+  uptime: true
+
+chat:
+  max-lines: 10
+  max-length: 100
+  lifetime-seconds: 0    # 0=消えない(古いものから押し出される) / 例 60=60秒で消える
+  blocked-patterns: []   # 伏せ字にする正規表現。例: ["\\d{3}-\\d{4}", "password"]
+
+notifications:
+  lifetime-seconds: 6
+
+players:
+  hide-vanished: true    # バニッシュ中のプレイヤーを映さない(metadata "vanished")
+  bedrock-prefix: "."    # Floodgateのプレフィックス(統合版プレイヤー判別用)
+
+# 各パーツの位置。画面に対する相対値(0〜1)なので解像度を変えても崩れません
+layout:
+  header:  { x: 0.02, y: 0.03, w: 0.96, h: 0.13 }
+  toasts:  { x: 0.02, y: 0.19, w: 0.34, h: 0.26 }
+  chat:    { x: 0.02, y: 0.50, w: 0.48, h: 0.46 }
+  players: { x: 0.76, y: 0.19, w: 0.22, h: 0.77 }
+
+# 表示文言({name} {n} が置換されます)
+labels:
+  online: "オンライン"
+  uptime: "稼働時間"
+  players: "プレイヤー"
+  chat: "チャット"
+  joined: "{name} が参加しました"
+  left: "{name} が退出しました"
+  more: "他 {n} 人"
